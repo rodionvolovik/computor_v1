@@ -1,6 +1,5 @@
 import sys
 import re
-import math
 
 """ Class Computor solves polynomials of the second power """
 
@@ -34,7 +33,7 @@ class Computor:
     def __parse_equation(self):
         pos_equal_sign = self.equation.find(self.CHAR_EQUAL)
         if pos_equal_sign == -1:
-            self.__error_exit("ERROR: Wrong format")
+            self.__error_exit("ERROR: Wrong format3")
         equation_left_array = self.__split_polynomial(self.equation[:pos_equal_sign - 1])
         equation_right_array = self.__split_polynomial(self.equation[pos_equal_sign + 2:])
         for equation_member in equation_left_array:
@@ -46,21 +45,30 @@ class Computor:
         simplified = simplified + str(self.coeff[2]) + " * X^2 " if self.coeff[2] else " "
         simplified = simplified + str(self.coeff[1]) + " * X^1 " if self.coeff[1] else " "
         simplified = simplified + str(self.coeff[0]) + " * X^0 " if self.coeff[0] else " "
-        print("Simplified eq: " + simplified + " = 0")
+        print("Reduced form: " + simplified + " = 0")
 
     def __calculate(self):
-        if not self.coeff[2]:
+        if not self.coeff[2] and self.coeff[1]:
+            print("Polynomial degree: 1")
+            print("The solution is:")
             result = -1 * self.coeff[0] / self.coeff[1]
             print(result)
+        elif not self.coeff[2] and not self.coeff[1]:
+            if self.coeff[0] == 0:
+                print("Any number could be a solution")
+            else:
+                print("No solution")
         else:
             discriminant = self.coeff[1] ** 2 - 4 * self.coeff[2] * self.coeff[0]
             if discriminant < 0:
                 self.__error_exit("No result")
             elif discriminant == 0:
-                print("Result " + str(-1 * self.coeff[1] / 2 * self.coeff[2]))
+                print("Discriminant is equal zero, the solution is:")
+                print(str(-1 * self.coeff[1] / 2 * self.coeff[2]))
             else:
-                result1 = str((-1 * self.coeff[1] + math.sqrt(discriminant)) / (2 * self.coeff[2]))
-                result2 = str((-1 * self.coeff[1] - math.sqrt(discriminant)) / (2 * self.coeff[2]))
+                print("Discriminant is strictly positive, the two solutions are:")
+                result1 = str((-1 * self.coeff[1] + discriminant**(1.0/2.0)) / (2 * self.coeff[2]))
+                result2 = str((-1 * self.coeff[1] - discriminant**(1.0/2.0)) / (2 * self.coeff[2]))
                 print("Result " + result1 + ", " + result2)
 
     def __split_polynomial(self, polynomial_string):
@@ -74,17 +82,18 @@ class Computor:
         return (polynomial_members)
 
     def __extract_coefficient(self, polynomial_member, SIDE):
+        pow_value = 0
         try:
             pow_value = eval(polynomial_member[polynomial_member.find(self.CHAR_POWER) + 1:])
-            if 2 < pow_value or pow_value < 0:
-                self.__error_exit("ERROR: Polynomial power must be in range [0, 2]")
-            try:
-                coeff = eval(polynomial_member[:polynomial_member.find(self.CHAR_ASTERIX) - 1])
-                self.coeff[pow_value] = self.coeff[pow_value] + coeff * SIDE
-            except:
-                self.__error_exit("ERROR: Wrong format2")
         except:
-            self.__error_exit("ERROR: Wrong format3")
+            self.__error_exit("Wrong format1")
+        if 2 < pow_value or pow_value < 0:
+            self.__error_exit("The polynomial degree is stricly greater than 2, I can't solve.")
+        try:
+            coeff = eval(polynomial_member[:polynomial_member.find(self.CHAR_ASTERIX) - 1])
+            self.coeff[pow_value] = self.coeff[pow_value] + coeff * SIDE
+        except:
+            self.__error_exit("Wrong format2")
 
     def __error_exit(self, error_comment):
         print(error_comment)
